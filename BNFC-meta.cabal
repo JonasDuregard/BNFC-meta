@@ -41,7 +41,7 @@ Library
   Build-Depends: 
     base>=4.2&&<5
     , array>=0.4&&<0.6
-    , template-haskell >=2.11&&<2.12
+    , template-haskell >=2.11 && < 2.13
     , haskell-src-meta >= 0.5 && < 1.0
     , happy-meta >= 0.2.0.4 && < 0.3
     , alex-meta >= 0.3.0.5 && < 0.4

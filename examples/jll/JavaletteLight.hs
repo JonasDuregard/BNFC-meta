@@ -5,7 +5,7 @@ module JavaletteLight where
 import Language.LBNF.Compiletime
 
 import Language.LBNF(lbnf, dumpCode, bnfc)
-dumpCode [lbnf|
+bnfc [lbnf|
 
 Fun.      Prog     ::= Typ Ident "(" ")" "{" [Stm] "}" ;
 

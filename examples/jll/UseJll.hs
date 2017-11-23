@@ -24,3 +24,6 @@ printing e = Fun TInt (Ident "main") [SFunApp (Ident "print") [e]]
 print10 :: Prog
 print10 = printing' [expr| 5 + 5 |]
 
+main :: IO ()
+main = do
+  print print10

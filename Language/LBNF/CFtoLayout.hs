@@ -67,8 +67,9 @@ cf2Layout cf =
       (id         [''Token, 'Err,  ''Posn, 'PT,  ''Tok, 'TS,  'Pn, ''Block, 'Implicit, 'Explicit])
       (map mkName ["Token", "Err", "Posn", "PT", "Tok", "TS", "Pn", "Block", "Implicit","Explicit"])
  in fmap mkRename $  
-     fmap (DataD [] (mkName "Block") [] Nothing [NormalC (mkName "Implicit") [(Bang NoSourceUnpackedness NoSourceStrictness,ConT ''Int)],
-       NormalC (mkName "Explicit") []] [ConT ''Show]:)
+     fmap (DataD [] (mkName "Block") [] Nothing [NormalC (mkName "Implicit") [(Bang NoSourceUnpackedness NoSourceStrictness ,ConT ''Int)],
+       NormalC (mkName "Explicit") []]
+       ([DerivClause Nothing [ConT ''Show]])  :)
        (makedecs top lay stop (sort (reservedWords cf ++ symbols cf)))
        
 -- Hack to make haddock work

@@ -24,40 +24,47 @@ import Language.Haskell.TH
 
 import Language.LBNF.CF
 
+
+
 absRules :: CF -> Q [Dec]
 absRules cf0 = sequence $ 
-  map (prData $ map mkName $ derivations cf0) $ cf2data cf0
-
-
+  map (prData $ mkDerivClause $ map mkName $ derivations cf0) $ cf2data cf0
+  where
+    mkDerivClause :: [Name] -> [Q DerivClause]
+    mkDerivClause names = return $ return $ DerivClause Nothing (map ConT names)
 
 
 absTokens :: CF -> Q [Dec]
 absTokens cf0 = sequence $ 
-  map (prSpecialData (map mkName $ derivations cf0) cf0) (specialCats cf0)
-
+  map (prSpecialData (mkDerivClause $ map mkName $ derivations cf0) cf0) (specialCats cf0)
+  where
+    mkDerivClause :: [Name] -> [DerivClause]
+    mkDerivClause names = return $ DerivClause Nothing (map ConT names)
 
 
 fixname :: String -> TypeQ
 fixname ('[':xs) = appT listT $ conT $ mkName $ init xs
 fixname xs = conT $ mkName xs
   
-prData :: [Name] -> Data -> Q Dec
+prData :: [DerivClauseQ] -> Data -> Q Dec
 prData deriv (cat,rules) = 
-  dataD (return []) (mkName cat) [] Nothing (map cons rules) deriv' where
+  dataD (return []) (mkName cat) [] Nothing (map cons rules) deriv where
     cons (fun,cats) = normalC (mkName fun) $ either (map typ) (const str) cats
     typ = strictType notStrict . fixname
     str = [typ "String"]
-    deriv' = mapM conT deriv
-
 
 -- deriv = [''Eq,''Ord,''Show]
 
-prSpecialData :: [Name] -> CF -> Cat -> Q Dec
-prSpecialData deriv cf cat =
-  newtypeD (return []) (mkName cat) [] Nothing con deriv' where
-    con = normalC (mkName cat) $ [typ]
-    typ = strictType notStrict $ contentSpec cf cat
-    deriv' = mapM conT deriv
+prSpecialData :: [DerivClause] -> CF -> Cat -> Q Dec
+prSpecialData deriv cf cat = do
+  let con = normalC (mkName cat) $ [typ]
+      typ = strictType notStrict $ contentSpec cf cat
+  ctxt1 <- (return [])
+  con1  <- con
+  return (NewtypeD ctxt1 (mkName cat) [] Nothing con1 deriv)  
+-- got rid of newtypeD by replacing it with its definition in 2.10.0.0, and then
+-- forcing the parameters of NewtypeD to match up with the new types in 2.12.0.0
+
 
 contentSpec :: CF -> Cat -> Q Type
 contentSpec cf cat = if isPositionCat cf cat 
